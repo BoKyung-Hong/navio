@@ -10,13 +10,15 @@ import java.util.List;
 
 public record CreateBookingRequest(
         @NotNull Long flightId,
-        @NotBlank String seatClass,        // ECONOMY / BUSINESS / FIRST
+        @NotBlank String seatClass,
         @NotEmpty @Valid List<PassengerInput> passengers
 ) {
     public record PassengerInput(
             String nameKorean,
             @NotBlank String nameEnglish,
             @NotNull LocalDate birthDate,
-            @NotBlank String gender
+            @NotBlank String gender,
+            String passportNumber,
+            String nationality
     ) {}
 }

@@ -37,3 +37,7 @@ frontend/.env.production
 logs/
 
 # Docker volumes (관리는 docker compose down -v로)
+
+# Claude Code local settings
+backend/.claude/
+.claude/

@@ -1,0 +1,41 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: navio-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_pw
+      MYSQL_DATABASE: navio
+      MYSQL_USER: navio
+      MYSQL_PASSWORD: navio_pw
+      TZ: Asia/Seoul
+    ports:
+      - "3307:3306"      # 로컬 MySQL(3306)과 충돌 피하려고 호스트 포트만 3307
+    volumes:
+      - navio-mysql-data:/var/lib/mysql
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pw"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: navio-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - navio-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  navio-mysql-data:
+  navio-redis-data:

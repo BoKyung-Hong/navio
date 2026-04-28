@@ -10,19 +10,29 @@ const AIRPORTS = [
   { code: 'CDG', name: '파리' },
 ];
 
+function nextDate(offset: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return d.toISOString().slice(0, 10);
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
+  const [tripType, setTripType] = useState<'ONE_WAY' | 'ROUND'>('ONE_WAY');
   const [departure, setDeparture] = useState('ICN');
   const [arrival, setArrival] = useState('NRT');
-  const [date, setDate] = useState(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
-  });
+  const [date, setDate] = useState(nextDate(1));
+  const [returnDate, setReturnDate] = useState(nextDate(8));
 
   const handleSearch = () => {
-    const params = new URLSearchParams({ departure, arrival, date });
+    const params = new URLSearchParams({ departure, arrival, date, tripType });
+    if (tripType === 'ROUND') params.set('returnDate', returnDate);
     navigate(`/search?${params.toString()}`);
+  };
+
+  const swapAirports = () => {
+    setDeparture(arrival);
+    setArrival(departure);
   };
 
   return (
@@ -35,24 +45,68 @@ export default function HomePage() {
       </section>
 
       <section className="card max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold mb-4">항공편 검색</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="flex gap-3 mb-5">
+          <button
+            onClick={() => setTripType('ONE_WAY')}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              tripType === 'ONE_WAY'
+                ? 'bg-navio-primary text-white border-navio-primary'
+                : 'border-slate-300 hover:border-navio-primary'
+            }`}
+          >
+            편도
+          </button>
+          <button
+            onClick={() => setTripType('ROUND')}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              tripType === 'ROUND'
+                ? 'bg-navio-primary text-white border-navio-primary'
+                : 'border-slate-300 hover:border-navio-primary'
+            }`}
+          >
+            왕복
+          </button>
+        </div>
+
+        <div className={`grid gap-4 ${tripType === 'ROUND' ? 'grid-cols-2 md:grid-cols-5' : 'grid-cols-1 md:grid-cols-4'}`}>
           <div>
             <label className="block text-sm font-medium mb-1">출발</label>
             <select className="input-base" value={departure} onChange={(e) => setDeparture(e.target.value)}>
               {AIRPORTS.map((a) => <option key={a.code} value={a.code}>{a.name} ({a.code})</option>)}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">도착</label>
-            <select className="input-base" value={arrival} onChange={(e) => setArrival(e.target.value)}>
-              {AIRPORTS.map((a) => <option key={a.code} value={a.code}>{a.name} ({a.code})</option>)}
-            </select>
+
+          <div className="flex items-end gap-1">
+            <div className="flex-1">
+              <label className="block text-sm font-medium mb-1">도착</label>
+              <select className="input-base" value={arrival} onChange={(e) => setArrival(e.target.value)}>
+                {AIRPORTS.map((a) => <option key={a.code} value={a.code}>{a.name} ({a.code})</option>)}
+              </select>
+            </div>
+            <button
+              onClick={swapAirports}
+              title="출발/도착 교환"
+              className="mb-0.5 p-2 rounded-lg border border-slate-300 hover:bg-slate-100 text-slate-500 text-xs"
+            >
+              ⇆
+            </button>
           </div>
+
           <div>
             <label className="block text-sm font-medium mb-1">출발 날짜</label>
-            <input type="date" className="input-base" value={date} onChange={(e) => setDate(e.target.value)} />
+            <input type="date" className="input-base" value={date}
+              onChange={(e) => setDate(e.target.value)} />
           </div>
+
+          {tripType === 'ROUND' && (
+            <div>
+              <label className="block text-sm font-medium mb-1">귀국 날짜</label>
+              <input type="date" className="input-base" value={returnDate}
+                min={date}
+                onChange={(e) => setReturnDate(e.target.value)} />
+            </div>
+          )}
+
           <div className="flex items-end">
             <button onClick={handleSearch} className="btn-primary w-full">검색</button>
           </div>

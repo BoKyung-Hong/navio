@@ -13,7 +13,7 @@ export default function BookingFormPage() {
   const navigate = useNavigate();
   const state = useLocation().state as LocationState | null;
   const [passengers, setPassengers] = useState<PassengerInput[]>([
-    { nameEnglish: '', birthDate: '', gender: 'MALE' },
+    { nameEnglish: '', birthDate: '', gender: 'MALE', passportNumber: '', nationality: '' },
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +31,7 @@ export default function BookingFormPage() {
   };
 
   const addPassenger = () => {
-    setPassengers((prev) => [...prev, { nameEnglish: '', birthDate: '', gender: 'MALE' }]);
+    setPassengers((prev) => [...prev, { nameEnglish: '', birthDate: '', gender: 'MALE', passportNumber: '', nationality: '' }]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,6 +86,21 @@ export default function BookingFormPage() {
                   <option value="MALE">남자</option>
                   <option value="FEMALE">여자</option>
                 </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm mb-1">여권번호 (국제선)</label>
+                <input className="input-base" placeholder="M12345678"
+                  value={p.passportNumber ?? ''}
+                  onChange={(e) => updatePassenger(i, { passportNumber: e.target.value.toUpperCase() })} />
+              </div>
+              <div>
+                <label className="block text-sm mb-1">국적 (ISO 3166-1)</label>
+                <input className="input-base" placeholder="KOR"
+                  maxLength={3}
+                  value={p.nationality ?? ''}
+                  onChange={(e) => updatePassenger(i, { nationality: e.target.value.toUpperCase() })} />
               </div>
             </div>
           </div>

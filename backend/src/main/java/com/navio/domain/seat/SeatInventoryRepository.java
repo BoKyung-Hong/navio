@@ -36,4 +36,6 @@ public interface SeatInventoryRepository extends JpaRepository<SeatInventory, Lo
     """)
     Optional<SeatInventory> findForUpdate(@Param("flightId") Long flightId,
                                           @Param("seatClass") SeatClass seatClass);
+
+    void deleteByFlightId(Long flightId);
 }

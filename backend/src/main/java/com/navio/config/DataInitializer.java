@@ -43,21 +43,23 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (airportRepository.count() > 0) {
-            log.info("[DataInitializer] Seed data already present. Skip.");
+        if (airportRepository.count() == 0) {
+            airportRepository.saveAll(List.of(
+                    Airport.builder().code("ICN").nameKo("인천국제공항").nameEn("Incheon Intl").city("Seoul").country("KR").timezone("Asia/Seoul").build(),
+                    Airport.builder().code("NRT").nameKo("나리타국제공항").nameEn("Narita Intl").city("Tokyo").country("JP").timezone("Asia/Tokyo").build(),
+                    Airport.builder().code("KIX").nameKo("간사이국제공항").nameEn("Kansai Intl").city("Osaka").country("JP").timezone("Asia/Tokyo").build(),
+                    Airport.builder().code("LAX").nameKo("로스앤젤레스 국제공항").nameEn("Los Angeles Intl").city("Los Angeles").country("US").timezone("America/Los_Angeles").build(),
+                    Airport.builder().code("JFK").nameKo("존 F. 케네디 국제공항").nameEn("John F. Kennedy Intl").city("New York").country("US").timezone("America/New_York").build(),
+                    Airport.builder().code("CDG").nameKo("샤를 드 골 공항").nameEn("Charles de Gaulle").city("Paris").country("FR").timezone("Europe/Paris").build()
+            ));
+        }
+
+        if (flightRepository.existsByDepartureTimeAfter(LocalDateTime.now())) {
+            log.info("[DataInitializer] Future flights already present. Skip.");
             return;
         }
 
         log.info("[DataInitializer] Inserting seed data...");
-
-        airportRepository.saveAll(List.of(
-                Airport.builder().code("ICN").nameKo("인천국제공항").nameEn("Incheon Intl").city("Seoul").country("KR").timezone("Asia/Seoul").build(),
-                Airport.builder().code("NRT").nameKo("나리타국제공항").nameEn("Narita Intl").city("Tokyo").country("JP").timezone("Asia/Tokyo").build(),
-                Airport.builder().code("KIX").nameKo("간사이국제공항").nameEn("Kansai Intl").city("Osaka").country("JP").timezone("Asia/Tokyo").build(),
-                Airport.builder().code("LAX").nameKo("로스앤젤레스 국제공항").nameEn("Los Angeles Intl").city("Los Angeles").country("US").timezone("America/Los_Angeles").build(),
-                Airport.builder().code("JFK").nameKo("존 F. 케네디 국제공항").nameEn("John F. Kennedy Intl").city("New York").country("US").timezone("America/New_York").build(),
-                Airport.builder().code("CDG").nameKo("샤를 드 골 공항").nameEn("Charles de Gaulle").city("Paris").country("FR").timezone("Europe/Paris").build()
-        ));
 
         LocalDate today = LocalDate.now();
         for (int i = 1; i <= 7; i++) {
@@ -82,14 +84,17 @@ public class DataInitializer implements CommandLineRunner {
                 .departureTime(depart).arrivalTime(arrive)
                 .aircraftType(aircraft)
                 .checkinOpenMinutes(1440).checkinCloseMinutes(60)
+                .baggageCarryOnKg(10).baggageCarryOnSize("55x40x20").baggageCheckedKg(23)
                 .build();
         Flight saved = flightRepository.save(flight);
 
         seatInventoryRepository.save(SeatInventory.builder()
                 .flightId(saved.getId()).seatClass(SeatClass.ECONOMY)
-                .totalSeats(180).availableSeats(180).price(economyPrice).build());
+                .totalSeats(180).availableSeats(180).price(economyPrice)
+                .overbookingRate(0.05).build());
         seatInventoryRepository.save(SeatInventory.builder()
                 .flightId(saved.getId()).seatClass(SeatClass.BUSINESS)
-                .totalSeats(24).availableSeats(24).price(businessPrice).build());
+                .totalSeats(24).availableSeats(24).price(businessPrice)
+                .overbookingRate(0.05).build());
     }
 }

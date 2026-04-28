@@ -46,6 +46,26 @@ public class TossPaymentsClient {
     @Value("${navio.toss.api-base-url}")
     private String baseUrl;
 
+    public JsonNode cancel(String paymentKey, String cancelReason) {
+        String url = baseUrl + "/payments/" + paymentKey + "/cancel";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(Base64.getEncoder().encodeToString((secretKey + ":").getBytes()));
+
+        Map<String, Object> body = Map.of("cancelReason", cancelReason);
+        try {
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            return objectMapper.readTree(response.getBody());
+        } catch (HttpClientErrorException e) {
+            log.warn("TossPayments cancel failed: {}", e.getResponseBodyAsString());
+            throw new BusinessException(ErrorCode.PAYMENT_FAILED, e.getResponseBodyAsString());
+        } catch (Exception e) {
+            log.error("TossPayments cancel error", e);
+            throw new BusinessException(ErrorCode.PAYMENT_FAILED);
+        }
+    }
+
     /**
      * TossPayments 결제 승인 요청.
      * @return 승인 응답 JSON (status, method, totalAmount, approvedAt 등)

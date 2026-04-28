@@ -7,6 +7,7 @@ export interface Flight {
   aircraftType: string | null;
   seats: SeatInfo[];
   checkin: { openMinutesBefore: number; closeMinutesBefore: number };
+  baggage: { carryOnKg: number; carryOnSize: string; checkedKg: number };
 }
 
 export interface Endpoint {
