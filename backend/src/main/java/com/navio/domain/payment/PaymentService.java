@@ -70,6 +70,7 @@ public class PaymentService {
         Payment saved = paymentRepository.save(payment);
 
         booking.confirm();
+        booking.ticket();
 
         return saved;
     }

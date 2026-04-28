@@ -14,4 +14,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @Query("SELECT b FROM Booking b WHERE b.status = 'PENDING' AND b.createdAt < :threshold")
     List<Booking> findExpiredPending(@Param("threshold") LocalDateTime threshold);
+
+    List<Booking> findByStatus(BookingStatus status);
 }

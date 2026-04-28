@@ -40,7 +40,10 @@ public enum ErrorCode {
     // 결제 (Payment)
     AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "결제 금액이 일치하지 않습니다."),
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제에 실패했습니다."),
-    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다.");
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다."),
+
+    // AI 채팅
+    AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서비스를 현재 사용할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

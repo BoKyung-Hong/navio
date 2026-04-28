@@ -29,11 +29,13 @@ public record FlightResponse(
         Endpoint arrival,
         String aircraftType,
         List<SeatInfo> seats,
-        Checkin checkin
+        Checkin checkin,
+        Baggage baggage
 ) {
     public record Endpoint(String airport, String airportName, LocalDateTime time, String timezone) {}
     public record SeatInfo(String seatClass, int available, int price) {}
     public record Checkin(int openMinutesBefore, int closeMinutesBefore) {}
+    public record Baggage(int carryOnKg, String carryOnSize, int checkedKg) {}
 
     public static FlightResponse from(Flight f, Airport dep, Airport arr, List<SeatInventory> seats) {
         return new FlightResponse(
@@ -52,7 +54,8 @@ public record FlightResponse(
                 seats.stream()
                         .map(s -> new SeatInfo(s.getSeatClass().name(), s.getAvailableSeats(), s.getPrice()))
                         .toList(),
-                new Checkin(f.getCheckinOpenMinutes(), f.getCheckinCloseMinutes())
+                new Checkin(f.getCheckinOpenMinutes(), f.getCheckinCloseMinutes()),
+                new Baggage(f.getBaggageCarryOnKg(), f.getBaggageCarryOnSize(), f.getBaggageCheckedKg())
         );
     }
 }

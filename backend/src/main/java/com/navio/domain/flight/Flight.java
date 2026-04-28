@@ -67,6 +67,18 @@ public class Flight {
     @Column(name = "checkin_close_minutes", nullable = false)
     private Integer checkinCloseMinutes;
 
+    /** 기내 수하물 허용 무게 (kg). 기본 10kg. */
+    @Column(name = "baggage_carry_on_kg", nullable = false)
+    private Integer baggageCarryOnKg;
+
+    /** 기내 수하물 허용 사이즈 (가로x세로x높이 cm). 기본 55x40x20. */
+    @Column(name = "baggage_carry_on_size", nullable = false, length = 20)
+    private String baggageCarryOnSize;
+
+    /** 위탁 수하물 허용 무게 (kg). 기본 23kg. */
+    @Column(name = "baggage_checked_kg", nullable = false)
+    private Integer baggageCheckedKg;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -75,5 +87,8 @@ public class Flight {
         if (this.createdAt == null) this.createdAt = LocalDateTime.now();
         if (this.checkinOpenMinutes == null) this.checkinOpenMinutes = 1440;
         if (this.checkinCloseMinutes == null) this.checkinCloseMinutes = 60;
+        if (this.baggageCarryOnKg == null) this.baggageCarryOnKg = 10;
+        if (this.baggageCarryOnSize == null) this.baggageCarryOnSize = "55x40x20";
+        if (this.baggageCheckedKg == null) this.baggageCheckedKg = 23;
     }
 }

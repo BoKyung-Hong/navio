@@ -87,6 +87,10 @@ public class Booking {
         this.updatedAt = LocalDateTime.now();
     }
 
-    public void confirm() { this.status = BookingStatus.CONFIRMED; }
-    public void cancel()  { this.status = BookingStatus.CANCELLED; }
+    public void confirm()        { this.status = BookingStatus.CONFIRMED; }
+    public void ticket()         { this.status = BookingStatus.TICKETED; }
+    public void requestCancel()  { this.status = BookingStatus.CANCEL_REQUESTED; }
+    public void startRefund()    { this.status = BookingStatus.REFUND_PENDING; }
+    public void refund()         { this.status = BookingStatus.REFUNDED; }
+    public void cancel()         { this.status = BookingStatus.CANCELLED; }
 }

@@ -82,14 +82,17 @@ public class DataInitializer implements CommandLineRunner {
                 .departureTime(depart).arrivalTime(arrive)
                 .aircraftType(aircraft)
                 .checkinOpenMinutes(1440).checkinCloseMinutes(60)
+                .baggageCarryOnKg(10).baggageCarryOnSize("55x40x20").baggageCheckedKg(23)
                 .build();
         Flight saved = flightRepository.save(flight);
 
         seatInventoryRepository.save(SeatInventory.builder()
                 .flightId(saved.getId()).seatClass(SeatClass.ECONOMY)
-                .totalSeats(180).availableSeats(180).price(economyPrice).build());
+                .totalSeats(180).availableSeats(180).price(economyPrice)
+                .overbookingRate(0.05).build());
         seatInventoryRepository.save(SeatInventory.builder()
                 .flightId(saved.getId()).seatClass(SeatClass.BUSINESS)
-                .totalSeats(24).availableSeats(24).price(businessPrice).build());
+                .totalSeats(24).availableSeats(24).price(businessPrice)
+                .overbookingRate(0.05).build());
     }
 }

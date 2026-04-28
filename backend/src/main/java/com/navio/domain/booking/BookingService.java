@@ -2,11 +2,16 @@ package com.navio.domain.booking;
 
 import com.navio.common.BusinessException;
 import com.navio.common.ErrorCode;
+import com.navio.domain.alarm.AlarmService;
 import com.navio.domain.booking.dto.BookingResponse;
 import com.navio.domain.booking.dto.CreateBookingRequest;
+import com.navio.domain.flight.Flight;
+import com.navio.domain.flight.FlightRepository;
 import com.navio.domain.seat.SeatClass;
 import com.navio.domain.seat.SeatInventory;
 import com.navio.domain.seat.SeatInventoryRepository;
+import com.navio.domain.user.User;
+import com.navio.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,13 +30,15 @@ import java.util.List;
  *   - SeatInventory 비관적 락 획득 → 좌석 차감 → Booking + Passenger 생성 → 원자적 저장
  *   - 좌석 부족 시 SOLD_OUT 예외 (409 Conflict)
  *   - 예약번호 형식: NV{YYYYMMDD}{A-Z0-9 4자리 랜덤}
+ *   - 예약 생성 후 AlarmService.register()로 6종 알람 등록
  *
  * cancel():
  *   - 본인 예약인지 확인 (userId 불일치 → FORBIDDEN)
- *   - 이미 취소된 예약 → ALREADY_CANCELLED
- *   - 좌석 복구(SeatInventory.restore) → Booking.cancel() 한 트랜잭션으로 처리
+ *   - CANCELLED/CANCEL_REQUESTED → ALREADY_CANCELLED
+ *   - PENDING 취소: 좌석 복구 → CANCELLED (환불 없음)
+ *   - CONFIRMED/TICKETED 취소: 좌석 복구 → CANCEL_REQUESTED (환불 대기)
  *
- * 관련: Booking, Passenger, SeatInventory, BookingRepository, SeatInventoryRepository
+ * 관련: Booking, Passenger, SeatInventory, AlarmService, BookingRepository
  */
 @Service
 @RequiredArgsConstructor
@@ -39,6 +46,9 @@ public class BookingService {
 
     private final BookingRepository bookingRepository;
     private final SeatInventoryRepository seatInventoryRepository;
+    private final FlightRepository flightRepository;
+    private final UserRepository userRepository;
+    private final AlarmService alarmService;
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -74,7 +84,14 @@ public class BookingService {
                     .build());
         }
 
-        return BookingResponse.from(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+
+        flightRepository.findById(req.flightId()).ifPresent(flight -> {
+            userRepository.findById(userId).ifPresent(user ->
+                    alarmService.register(saved, flight, user.getEmail()));
+        });
+
+        return BookingResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
@@ -96,7 +113,9 @@ public class BookingService {
         if (!booking.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
-        if (booking.getStatus() == BookingStatus.CANCELLED) {
+        if (booking.getStatus() == BookingStatus.CANCELLED
+                || booking.getStatus() == BookingStatus.CANCEL_REQUESTED
+                || booking.getStatus() == BookingStatus.REFUND_PENDING) {
             throw new BusinessException(ErrorCode.ALREADY_CANCELLED);
         }
 
@@ -104,7 +123,13 @@ public class BookingService {
                 .findForUpdate(booking.getFlightId(), booking.getSeatClass())
                 .ifPresent(inv -> inv.restore(booking.getPassengerCount()));
 
-        booking.cancel();
+        if (booking.getStatus() == BookingStatus.PENDING) {
+            booking.cancel();
+        } else {
+            // CONFIRMED / TICKETED → 환불 대기
+            booking.requestCancel();
+        }
+
         return BookingResponse.from(booking);
     }
 

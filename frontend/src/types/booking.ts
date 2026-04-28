@@ -1,7 +1,16 @@
+export type BookingStatus =
+  | 'PENDING'
+  | 'CONFIRMED'
+  | 'TICKETED'
+  | 'CANCEL_REQUESTED'
+  | 'CANCELLED'
+  | 'REFUND_PENDING'
+  | 'REFUNDED';
+
 export interface Booking {
   bookingId: number;
   bookingNumber: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'REFUNDED';
+  status: BookingStatus;
   flightId: number;
   seatClass: string;
   passengerCount: number;

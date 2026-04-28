@@ -55,12 +55,21 @@ public class SeatInventory {
     @Column(nullable = false)
     private Integer price;
 
+    /**
+     * 초과 예약 비율 (0.05 = 5%). 노쇼 승객을 고려해 총 좌석의 5%까지 초과 판매 허용.
+     * 판매 가능 상한 = (int)(totalSeats * (1 + overbookingRate))
+     */
+    @Column(name = "overbooking_rate", nullable = false)
+    @Builder.Default
+    private Double overbookingRate = 0.05;
+
     @Version
     private Long version;
 
-    /** 좌석 차감. 잔여 부족 시 SOLD_OUT 예외. 호출 전 findForUpdate()로 비관적 락 획득 필수. */
+    /** 좌석 차감. Overbooking 상한 초과 시 SOLD_OUT 예외. 호출 전 findForUpdate()로 비관적 락 획득 필수. */
     public void decrease(int count) {
-        if (this.availableSeats < count) {
+        int capacity = (int)(this.totalSeats * (1 + this.overbookingRate));
+        if (this.availableSeats < count || (this.totalSeats - this.availableSeats + count) > capacity) {
             throw new BusinessException(ErrorCode.SOLD_OUT);
         }
         this.availableSeats -= count;

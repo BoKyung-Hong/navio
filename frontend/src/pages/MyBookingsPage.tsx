@@ -45,12 +45,23 @@ export default function MyBookingsPage() {
 }
 
 function StatusBadge({ status }: { status: Booking['status'] }) {
-  const colors = {
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    CONFIRMED: 'bg-green-100 text-green-800',
-    CANCELLED: 'bg-slate-100 text-slate-600',
-    REFUNDED: 'bg-blue-100 text-blue-800',
+  const colors: Record<Booking['status'], string> = {
+    PENDING:          'bg-yellow-100 text-yellow-800',
+    CONFIRMED:        'bg-blue-100 text-blue-800',
+    TICKETED:         'bg-green-100 text-green-800',
+    CANCEL_REQUESTED: 'bg-orange-100 text-orange-800',
+    CANCELLED:        'bg-slate-100 text-slate-600',
+    REFUND_PENDING:   'bg-purple-100 text-purple-800',
+    REFUNDED:         'bg-slate-100 text-slate-700',
   };
-  const labels = { PENDING: '결제대기', CONFIRMED: '예약확정', CANCELLED: '취소', REFUNDED: '환불완료' };
+  const labels: Record<Booking['status'], string> = {
+    PENDING:          '결제대기',
+    CONFIRMED:        '결제완료',
+    TICKETED:         '발권완료',
+    CANCEL_REQUESTED: '취소요청',
+    CANCELLED:        '취소완료',
+    REFUND_PENDING:   '환불진행중',
+    REFUNDED:         '환불완료',
+  };
   return <span className={`px-2 py-1 rounded text-xs ${colors[status]}`}>{labels[status]}</span>;
 }
