@@ -16,4 +16,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     List<Booking> findExpiredPending(@Param("threshold") LocalDateTime threshold);
 
     List<Booking> findByStatus(BookingStatus status);
+    List<Booking> findAllByOrderByCreatedAtDesc();
+    boolean existsByFlightIdAndStatusIn(Long flightId, List<BookingStatus> statuses);
 }

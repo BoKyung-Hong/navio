@@ -83,4 +83,8 @@ public class Payment {
         this.status = PaymentStatus.FAILED;
         this.failureReason = reason;
     }
+
+    public void markCanceled() {
+        this.status = PaymentStatus.CANCELED;
+    }
 }

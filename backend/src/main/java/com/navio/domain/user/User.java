@@ -85,4 +85,14 @@ public class User {
         if (name != null && !name.isBlank()) this.name = name;
         if (phone != null && !phone.isBlank()) this.phone = phone;
     }
+
+    /** BCrypt 인코딩된 새 비밀번호로 교체. */
+    public void changePassword(String encodedNewPassword) {
+        this.password = encodedNewPassword;
+    }
+
+    /** 관리자에 의한 역할 변경 (USER | ADMIN). */
+    public void changeRole(String role) {
+        this.role = role;
+    }
 }

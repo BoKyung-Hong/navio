@@ -13,15 +13,14 @@ import java.util.Map;
 /**
  * UserController
  *
- * 현재 로그인한 사용자의 정보 조회 및 수정 API.
+ * 현재 로그인한 사용자의 정보 조회·수정·비밀번호 변경·탈퇴 API.
  *
- * GET  /api/users/me   → 내 정보 조회 (JWT 필요)
- * PATCH /api/users/me  → 이름, 전화번호 수정 (JWT 필요)
+ * GET    /api/users/me           → 내 정보 조회
+ * PATCH  /api/users/me          → 이름, 전화번호 수정
+ * PATCH  /api/users/me/password → 비밀번호 변경 (currentPassword, newPassword 필요)
+ * DELETE /api/users/me          → 회원 탈퇴 (password 필요, 예약·결제 데이터 함께 삭제)
  *
- * userId는 JwtAuthenticationFilter가 SecurityContext에 세팅한 UserPrincipal에서 가져온다.
- * 따라서 URL 경로에 userId를 노출하지 않아도 된다.
- *
- * 관련: User, UserRepository, UserPrincipal
+ * 관련: User, UserRepository, UserService, UserPrincipal
  */
 @RestController
 @RequestMapping("/api/users")
@@ -29,6 +28,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @GetMapping("/me")
     public ApiResponse<Map<String, Object>> me(@AuthenticationPrincipal UserPrincipal principal) {
@@ -45,6 +45,33 @@ public class UserController {
         user.update(body.get("name"), body.get("phone"));
         userRepository.save(user);
         return ApiResponse.ok(toMap(user));
+    }
+
+    @PatchMapping("/me/password")
+    public ApiResponse<Void> changePassword(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody Map<String, String> body
+    ) {
+        String current = body.get("currentPassword");
+        String next = body.get("newPassword");
+        if (current == null || next == null || next.length() < 8) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        }
+        userService.changePassword(principal.getUserId(), current, next);
+        return ApiResponse.ok(null);
+    }
+
+    @DeleteMapping("/me")
+    public ApiResponse<Void> deleteAccount(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestBody Map<String, String> body
+    ) {
+        String password = body.get("password");
+        if (password == null || password.isBlank()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        }
+        userService.deleteAccount(principal.getUserId(), password);
+        return ApiResponse.ok(null);
     }
 
     private User findUser(Long userId) {

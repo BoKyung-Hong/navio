@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/layout/Header';
 import PrivateRoute from './components/PrivateRoute';
+import AdminRoute from './components/AdminRoute';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -12,6 +13,10 @@ import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentFailPage from './pages/PaymentFailPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import BookingDetailPage from './pages/BookingDetailPage';
+import MyProfilePage from './pages/MyProfilePage';
+import AdminFlightPage from './pages/admin/AdminFlightPage';
+import AdminBookingPage from './pages/admin/AdminBookingPage';
+import AdminUserPage from './pages/admin/AdminUserPage';
 
 export default function App() {
   return (
@@ -32,6 +37,12 @@ export default function App() {
           <Route path="/payment/:bookingNumber" element={<PrivateRoute><PaymentPage /></PrivateRoute>} />
           <Route path="/my/bookings" element={<PrivateRoute><MyBookingsPage /></PrivateRoute>} />
           <Route path="/my/bookings/:bookingNumber" element={<PrivateRoute><BookingDetailPage /></PrivateRoute>} />
+          <Route path="/my/profile" element={<PrivateRoute><MyProfilePage /></PrivateRoute>} />
+
+          {/* 관리자 전용 */}
+          <Route path="/admin/flights" element={<AdminRoute><AdminFlightPage /></AdminRoute>} />
+          <Route path="/admin/bookings" element={<AdminRoute><AdminBookingPage /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminUserPage /></AdminRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

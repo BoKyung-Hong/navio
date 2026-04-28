@@ -53,16 +53,22 @@ public class JwtTokenProvider {
         this.redis = redis;
     }
 
-    /** Access Token 생성. 컨트롤러에서 @AuthenticationPrincipal로 주입될 userId/email을 포함한다. */
-    public String generateAccessToken(Long userId, String email) {
+    /** Access Token 생성. 컨트롤러에서 @AuthenticationPrincipal로 주입될 userId/email/role을 포함한다. */
+    public String generateAccessToken(Long userId, String email, String role) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(String.valueOf(userId))
                 .claim("email", email)
+                .claim("role", role != null ? role : "USER")
                 .issuedAt(now)
                 .expiration(new Date(now.getTime() + accessExpiryMs))
                 .signWith(key)
                 .compact();
+    }
+
+    public String getRole(String token) {
+        String role = parseClaims(token).get("role", String.class);
+        return role != null ? role : "USER";
     }
 
     /** Refresh Token 생성 후 Redis에 저장. 기존 토큰은 덮어쓴다. */

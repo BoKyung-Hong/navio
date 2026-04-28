@@ -91,4 +91,10 @@ public class Flight {
         if (this.baggageCarryOnSize == null) this.baggageCarryOnSize = "55x40x20";
         if (this.baggageCheckedKg == null) this.baggageCheckedKg = 23;
     }
+
+    public void update(LocalDateTime departureTime, LocalDateTime arrivalTime, String aircraftType) {
+        if (departureTime != null) this.departureTime = departureTime;
+        if (arrivalTime != null) this.arrivalTime = arrivalTime;
+        if (aircraftType != null && !aircraftType.isBlank()) this.aircraftType = aircraftType;
+    }
 }

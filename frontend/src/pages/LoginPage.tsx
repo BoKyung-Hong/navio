@@ -20,7 +20,7 @@ export default function LoginPage() {
     try {
       const res = await authApi.login({ email, password });
       const data = res.data;
-      setAuth({ id: data.userId, email: data.email, name: data.name }, data.accessToken, data.refreshToken);
+      setAuth({ id: data.userId, email: data.email, name: data.name, phone: data.phone, role: data.role ?? 'USER' }, data.accessToken, data.refreshToken);
       navigate(from, { replace: true });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '로그인에 실패했습니다.');

@@ -18,6 +18,8 @@ export interface TokenResponse {
   userId: number;
   email: string;
   name: string;
+  role: string;
+  phone?: string;
 }
 
 export const authApi = {
@@ -25,5 +27,11 @@ export const authApi = {
   login: (data: LoginPayload) => apiClient.post<TokenResponse>('/auth/login', data),
   refresh: (refreshToken: string) => apiClient.post<TokenResponse>('/auth/refresh', { refreshToken }),
   logout: () => apiClient.post<void>('/auth/logout'),
-  me: () => apiClient.get<{ id: number; email: string; name: string; phone: string }>('/users/me'),
+  me: () => apiClient.get<{ id: number; email: string; name: string; phone: string; role: string }>('/users/me'),
+  updateMe: (data: { name?: string; phone?: string }) =>
+    apiClient.patch<{ id: number; email: string; name: string; phone: string }>('/users/me', data),
+  changePassword: (data: { currentPassword: string; newPassword: string }) =>
+    apiClient.patch<void>('/users/me/password', data),
+  deleteAccount: (password: string) =>
+    apiClient.delete<void>('/users/me', { data: { password } }),
 };

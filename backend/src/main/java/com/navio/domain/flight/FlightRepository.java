@@ -31,4 +31,6 @@ public interface FlightRepository extends JpaRepository<Flight, Long> {
             @Param("dayStart") LocalDateTime dayStart,
             @Param("dayEnd") LocalDateTime dayEnd
     );
+
+    boolean existsByDepartureTimeAfter(LocalDateTime time);
 }

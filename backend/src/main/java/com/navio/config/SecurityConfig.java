@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/flights/**").permitAll()
                         .requestMatchers("/api/auth/signup", "/api/auth/login", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);

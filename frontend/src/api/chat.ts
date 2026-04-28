@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { apiClient } from './client';
 
 export const chatApi = {
   ask: (bookingNumber: string, message: string) =>

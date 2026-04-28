@@ -42,6 +42,9 @@ public enum ErrorCode {
     PAYMENT_FAILED(HttpStatus.BAD_REQUEST, "결제에 실패했습니다."),
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "결제 내역을 찾을 수 없습니다."),
 
+    // 사용자
+    WRONG_PASSWORD(HttpStatus.BAD_REQUEST, "현재 비밀번호가 올바르지 않습니다."),
+
     // AI 채팅
     AI_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서비스를 현재 사용할 수 없습니다.");
 

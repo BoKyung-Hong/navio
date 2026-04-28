@@ -79,4 +79,8 @@ public class SeatInventory {
     public void restore(int count) {
         this.availableSeats = Math.min(this.totalSeats, this.availableSeats + count);
     }
+
+    public void updatePrice(int price) {
+        this.price = price;
+    }
 }

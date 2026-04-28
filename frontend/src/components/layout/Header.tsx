@@ -24,11 +24,18 @@ export default function Header() {
           ✈️ Navio
         </Link>
         <nav className="flex items-center gap-4 text-sm">
-          <Link to="/search" className="hover:text-navio-primary">항공편 검색</Link>
+          <Link to="/" className="hover:text-navio-primary">항공편 검색</Link>
           {user ? (
             <>
               <Link to="/my/bookings" className="hover:text-navio-primary">내 예약</Link>
-              <span className="text-slate-500">{user.name}님</span>
+              <Link to="/my/profile" className="hover:text-navio-primary">{user.name}님</Link>
+              {user.role === 'ADMIN' && (
+                <>
+                  <Link to="/admin/flights" className="hover:text-navio-primary text-orange-600">항공편 관리</Link>
+                  <Link to="/admin/bookings" className="hover:text-navio-primary text-orange-600">예약 관리</Link>
+                  <Link to="/admin/users" className="hover:text-navio-primary text-orange-600">사용자 관리</Link>
+                </>
+              )}
               <button onClick={handleLogout} className="hover:text-navio-primary">로그아웃</button>
             </>
           ) : (

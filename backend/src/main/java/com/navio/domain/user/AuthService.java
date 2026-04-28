@@ -55,10 +55,11 @@ public class AuthService {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        String accessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-        return new TokenResponse(accessToken, refreshToken, user.getId(), user.getEmail(), user.getName());
+        return new TokenResponse(accessToken, refreshToken, user.getId(), user.getEmail(), user.getName(),
+                user.getRole(), user.getPhone() != null ? user.getPhone() : "");
     }
 
     public TokenResponse refresh(String refreshToken) {
@@ -72,10 +73,11 @@ public class AuthService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.TOKEN_INVALID));
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        String newAccessToken = jwtTokenProvider.generateAccessToken(user.getId(), user.getEmail(), user.getRole());
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-        return new TokenResponse(newAccessToken, newRefreshToken, user.getId(), user.getEmail(), user.getName());
+        return new TokenResponse(newAccessToken, newRefreshToken, user.getId(), user.getEmail(), user.getName(),
+                user.getRole(), user.getPhone() != null ? user.getPhone() : "");
     }
 
     public void logout(Long userId) {

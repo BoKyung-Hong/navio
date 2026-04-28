@@ -106,6 +106,28 @@ export default function BookingDetailPage() {
         </div>
       </div>
 
+      {/* 탑승객 상세 */}
+      {booking.passengers && booking.passengers.length > 0 && (
+        <div className="card">
+          <h2 className="text-base font-semibold mb-3">탑승객 정보</h2>
+          <div className="space-y-3">
+            {booking.passengers.map((p, i) => (
+              <div key={p.id} className="text-sm border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                <div className="font-medium mb-1">탑승객 {i + 1}</div>
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-700">
+                  <dt className="text-slate-400">영문명</dt><dd>{p.nameEnglish}</dd>
+                  {p.nameKorean && <><dt className="text-slate-400">한국명</dt><dd>{p.nameKorean}</dd></>}
+                  <dt className="text-slate-400">생년월일</dt><dd>{p.birthDate}</dd>
+                  <dt className="text-slate-400">성별</dt><dd>{p.gender === 'MALE' ? '남자' : '여자'}</dd>
+                  {p.passportNumber && <><dt className="text-slate-400">여권번호</dt><dd>{p.passportNumber}</dd></>}
+                  {p.nationality && <><dt className="text-slate-400">국적</dt><dd>{p.nationality}</dd></>}
+                </dl>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 탑승 안내 타임라인 */}
       {(booking.status === 'CONFIRMED' || booking.status === 'TICKETED') && (
         <div className="card">

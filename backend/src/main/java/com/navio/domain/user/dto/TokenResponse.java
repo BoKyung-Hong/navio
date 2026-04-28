@@ -5,5 +5,7 @@ public record TokenResponse(
         String refreshToken,
         Long userId,
         String email,
-        String name
+        String name,
+        String role,
+        String phone
 ) {}

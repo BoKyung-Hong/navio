@@ -7,12 +7,15 @@ import com.navio.domain.booking.dto.BookingResponse;
 import com.navio.domain.booking.dto.CreateBookingRequest;
 import com.navio.domain.flight.Flight;
 import com.navio.domain.flight.FlightRepository;
+import com.navio.domain.payment.PaymentRepository;
+import com.navio.domain.payment.TossPaymentsClient;
 import com.navio.domain.seat.SeatClass;
 import com.navio.domain.seat.SeatInventory;
 import com.navio.domain.seat.SeatInventoryRepository;
 import com.navio.domain.user.User;
 import com.navio.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,7 @@ import java.util.List;
  *
  * 관련: Booking, Passenger, SeatInventory, AlarmService, BookingRepository
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -49,6 +53,8 @@ public class BookingService {
     private final FlightRepository flightRepository;
     private final UserRepository userRepository;
     private final AlarmService alarmService;
+    private final PaymentRepository paymentRepository;
+    private final TossPaymentsClient tossPaymentsClient;
 
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -81,6 +87,8 @@ public class BookingService {
                     .nameEnglish(p.nameEnglish())
                     .birthDate(p.birthDate())
                     .gender(p.gender())
+                    .passportNumber(p.passportNumber())
+                    .nationality(p.nationality())
                     .build());
         }
 
@@ -115,7 +123,8 @@ public class BookingService {
         }
         if (booking.getStatus() == BookingStatus.CANCELLED
                 || booking.getStatus() == BookingStatus.CANCEL_REQUESTED
-                || booking.getStatus() == BookingStatus.REFUND_PENDING) {
+                || booking.getStatus() == BookingStatus.REFUND_PENDING
+                || booking.getStatus() == BookingStatus.REFUNDED) {
             throw new BusinessException(ErrorCode.ALREADY_CANCELLED);
         }
 
@@ -126,8 +135,17 @@ public class BookingService {
         if (booking.getStatus() == BookingStatus.PENDING) {
             booking.cancel();
         } else {
-            // CONFIRMED / TICKETED → 환불 대기
-            booking.requestCancel();
+            // CONFIRMED / TICKETED → TossPayments 취소 API 호출 후 즉시 환불
+            paymentRepository.findByBookingId(booking.getId()).ifPresentOrElse(payment -> {
+                try {
+                    tossPaymentsClient.cancel(payment.getPaymentKey(), "고객 취소 요청");
+                    payment.markCanceled();
+                    booking.refund();
+                } catch (Exception e) {
+                    log.warn("Toss cancel failed for booking {}: {}", bookingNumber, e.getMessage());
+                    booking.startRefund();  // REFUND_PENDING → 스케줄러가 재시도
+                }
+            }, booking::requestCancel);
         }
 
         return BookingResponse.from(booking);
